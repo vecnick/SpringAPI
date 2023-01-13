@@ -2,6 +2,7 @@ package nick.SpringAPI.controllers;
 
 
 import jakarta.validation.Valid;
+import nick.SpringAPI.DTO.PersonDTO;
 import nick.SpringAPI.models.Person;
 import nick.SpringAPI.services.PeopleService;
 import nick.SpringAPI.util.PersonErrorResponse;
@@ -14,6 +15,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -38,7 +40,7 @@ public class PeopleController {
     }
 
     @PostMapping
-    public ResponseEntity<HttpStatus>create(@RequestBody @Valid Person person,
+    public ResponseEntity<HttpStatus>create(@RequestBody @Valid PersonDTO personDTO,
                                             BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             StringBuilder errorMsg = new StringBuilder();
@@ -52,10 +54,12 @@ public class PeopleController {
             throw new PersonNotCreatedException(errorMsg.toString());
         }
 
-        peopleService.save(person);
+        peopleService.save(convertToPerson(personDTO));
 
         return ResponseEntity.ok(HttpStatus.OK);
     }
+
+
 
 
     @ExceptionHandler
@@ -77,4 +81,14 @@ public class PeopleController {
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); //ответ - 400 статус
     }
+    private Person convertToPerson(PersonDTO personDTO) {
+        Person person = new Person();
+
+        person.setName(personDTO.getName());
+        person.setAge(personDTO.getAge());
+        person.setEmail(personDTO.getEmail());
+
+        return person;
+    }
+
 }
